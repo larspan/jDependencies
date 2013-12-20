@@ -1,0 +1,69 @@
+<project default="runAllTests">
+	<property name="src.java.dir" value="src/main/java"/>
+	<property name="src.test.dir" value="src/test/java"/>
+	<property name="java.classes.dir" value="target/classes"/>
+	<property name="test.classes.dir" value="target/classes/test"/>
+	<property name="jar.dir" value="target/jar"/>
+	<property name="reports.tests" value="target/tests/reports"/>
+
+	<target name="clean">
+		<delete dir="target"/>
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${java.classes.dir}"/>
+		<mkdir dir="${test.classes.dir}"/>
+
+		<javac srcdir="${src.java.dir}" destdir="${java.classes.dir}" includeantruntime="false"/>
+		<javac srcdir="${src.test.dir}" destdir="${test.classes.dir}" includeantruntime="false">
+			<classpath>
+				<pathelement location="${java.classes.dir}"/>
+				<fileset dir="${junit.classpath}">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${jar.dir}"/>
+		<jar destfile="${jar.dir}/jDependencies.jar" basedir="${java.classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="com.pan.application.Application"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="run" depends="jar">
+		<java jar="${jar.dir}/jDependencies.jar" fork="true"/>
+	</target>
+
+	<target name="runAllTests" depends="compile">
+
+		<mkdir dir="${reports.tests}"/>
+
+		<junit printsummary="yes" haltonfailure="yes">
+			<classpath>
+				<pathelement location="${java.classes.dir}"/>
+				<pathelement location="${test.classes.dir}"/>
+				<fileset dir="${junit.classpath}">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			
+			<formatter type="plain"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.tests}">
+				<fileset dir="${src.test.dir}">
+					<include name="**/*Test.java"/>
+					<include name="**/*Should.java"/>
+				</fileset>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+</project>
